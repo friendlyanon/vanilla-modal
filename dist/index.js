@@ -69,6 +69,9 @@
       transitionEnd = _ref[0],
       transitionDuration = _ref[1];
 
+  var trimRegex = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
+  var whitespaceRegex = /\s+/;
+
   var defaults = {
     modal: ".modal",
     modalInner: ".modal-inner",
@@ -102,6 +105,27 @@
       throwError(selector + " not found in document");
     }
     return node;
+  }
+
+  function trim(str) {
+    return str.replace(trimRegex, "");
+  }
+
+  function addClass(el, _class) {
+    if (!el.hasAttribute("class")) return void el.setAttribute("class", _class);
+    var classNames = trim(el.getAttribute("class")).split(whitespaceRegex);
+    if (classNames.indexOf(_class) >= 0) return;
+    classNames.push(_class);
+    el.setAttribute("class", classNames.join(" "));
+  }
+
+  function removeClass(el, _class) {
+    if (!el.hasAttribute("class")) return;
+    var classNames = trim(el.getAttribute("class")).split(whitespaceRegex);
+    var idx = classNames.indexOf(_class);
+    if (idx < 0) return;
+    classNames.splice(idx, 1);
+    el.setAttribute("class", classNames.join(" "));
   }
 
   function getElementContext(e) {
@@ -180,7 +204,7 @@
 
       this.dom = getDomNodes(this.settings = applyUserSettings(settings));
 
-      this.dom.page.classList.add(this.settings.loadClass);
+      addClass(this.dom.page, this.settings.loadClass);
       this.listen();
     }
 
@@ -202,7 +226,7 @@
           crankshaftTryCatch(onbeforeopen, this, e);
         }
         this.captureNode(this.current);
-        page.classList.add(_class);
+        addClass(page, _class);
         page.setAttribute("data-current-modal", this.current.id || "anonymous");
         this.isOpen = true;
         if (typeof onopen === "function") {
@@ -223,7 +247,7 @@
         if (typeof onbeforeclose === "function") {
           crankshaftTryCatch(onbeforeclose, this, e);
         }
-        dom.page.classList.remove(_class);
+        removeClass(dom.page, _class);
         if (transitions && transitionEnd && hasTransition(dom.modal)) {
           return this.closeModalWithTransition(e);
         }

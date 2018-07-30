@@ -22,6 +22,8 @@ const {
   }
   return {};
 })();
+const trimRegex = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
+const whitespaceRegex = /\s+/;
 
 const defaults = {
   modal: ".modal",
@@ -58,6 +60,27 @@ function getNode(selector, parent) {
   return node;
 }
 
+function trim(str) {
+  return str.replace(trimRegex, "");
+}
+
+function addClass(el, _class) {
+  if (!el.hasAttribute("class")) return void el.setAttribute("class", _class);
+  const classNames = trim(el.getAttribute("class")).split(whitespaceRegex);
+  if (classNames.indexOf(_class) >= 0) return;
+  classNames.push(_class);
+  el.setAttribute("class", classNames.join(" "));
+}
+
+function removeClass(el, _class) {
+  if (!el.hasAttribute("class")) return;
+  const classNames = trim(el.getAttribute("class")).split(whitespaceRegex);
+  const idx = classNames.indexOf(_class);
+  if (idx < 0) return;
+  classNames.splice(idx, 1);
+  el.setAttribute("class", classNames.join(" "));
+}
+
 function getElementContext(e) {
   if (e && typeof e.hash === "string") {
     return document.querySelector(e.hash);
@@ -65,7 +88,7 @@ function getElementContext(e) {
   else if (typeof e === "string") {
     return document.querySelector(e);
   }
-  return throwError("No selector supplied to open()");
+  throwError("No selector supplied to open()");
 }
 
 function applyUserSettings(settings) {
@@ -128,15 +151,15 @@ export default class VanillaModal {
 
     this.dom = getDomNodes(this.settings = applyUserSettings(settings));
 
-    this.dom.page.classList.add(this.settings.loadClass);
+    addClass(this.dom.page, this.settings.loadClass);
     this.listen();
   }
 
-  open(allMatches, e) {
+  open(selector, e) {
     const { page } = this.dom;
     const { onbeforeopen, onopen, class: _class } = this.settings;
     this.releaseNode(this.current);
-    this.current = getElementContext(allMatches);
+    this.current = getElementContext(selector);
     if (!this.current) {
       return throwError("VanillaModal target must exist on page");
     }
@@ -144,7 +167,7 @@ export default class VanillaModal {
       crankshaftTryCatch(onbeforeopen, this, e);
     }
     this.captureNode(this.current);
-    page.classList.add(_class);
+    addClass(page, _class);
     page.setAttribute("data-current-modal", this.current.id || "anonymous");
     this.isOpen = true;
     if (typeof onopen === "function") {
@@ -162,7 +185,7 @@ export default class VanillaModal {
     if (typeof onbeforeclose === "function") {
       crankshaftTryCatch(onbeforeclose, this, e);
     }
-    dom.page.classList.remove(_class);
+    removeClass(dom.page, _class);
     if (
       transitions &&
       transitionEnd &&
