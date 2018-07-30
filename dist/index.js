@@ -42,8 +42,8 @@
   }();
 
   var _Object$prototype = Object.prototype,
-      has = _Object$prototype.hasOwnProperty,
-      toString = _Object$prototype.toString;
+    has = _Object$prototype.hasOwnProperty,
+    toString = _Object$prototype.toString;
 
   var html = document.documentElement;
 
