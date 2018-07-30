@@ -155,11 +155,11 @@ export default class VanillaModal {
     this.listen();
   }
 
-  open(allMatches, e) {
+  open(selector, e) {
     const { page } = this.dom;
     const { onbeforeopen, onopen, class: _class } = this.settings;
     this.releaseNode(this.current);
-    this.current = getElementContext(allMatches);
+    this.current = getElementContext(selector);
     if (!this.current) {
       return throwError("VanillaModal target must exist on page");
     }
