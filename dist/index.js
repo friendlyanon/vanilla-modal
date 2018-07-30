@@ -134,7 +134,7 @@
     } else if (typeof e === "string") {
       return document.querySelector(e);
     }
-    return throwError("No selector supplied to open()");
+    throwError("No selector supplied to open()");
   }
 
   function applyUserSettings(settings) {
