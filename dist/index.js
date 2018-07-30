@@ -42,8 +42,8 @@
   }();
 
   var _Object$prototype = Object.prototype,
-    has = _Object$prototype.hasOwnProperty,
-    toString = _Object$prototype.toString;
+      has = _Object$prototype.hasOwnProperty,
+      toString = _Object$prototype.toString;
 
   var html = document.documentElement;
 
@@ -68,6 +68,9 @@
   }(),
       transitionEnd = _ref[0],
       transitionDuration = _ref[1];
+
+  var trimRegex = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
+  var whitespaceRegex = /\s+/;
 
   var defaults = {
     modal: ".modal",
@@ -104,13 +107,34 @@
     return node;
   }
 
+  function trim(str) {
+    return str.replace(trimRegex, "");
+  }
+
+  function addClass(el, _class) {
+    if (!el.hasAttribute("class")) return void el.setAttribute("class", _class);
+    var classNames = trim(el.getAttribute("class")).split(whitespaceRegex);
+    if (classNames.indexOf(_class) >= 0) return;
+    classNames.push(_class);
+    el.setAttribute("class", classNames.join(" "));
+  }
+
+  function removeClass(el, _class) {
+    if (!el.hasAttribute("class")) return;
+    var classNames = trim(el.getAttribute("class")).split(whitespaceRegex);
+    var idx = classNames.indexOf(_class);
+    if (idx < 0) return;
+    classNames.splice(idx, 1);
+    el.setAttribute("class", classNames.join(" "));
+  }
+
   function getElementContext(e) {
     if (e && typeof e.hash === "string") {
       return document.querySelector(e.hash);
     } else if (typeof e === "string") {
       return document.querySelector(e);
     }
-    throwError("No selector supplied to open()");
+    return throwError("No selector supplied to open()");
   }
 
   function applyUserSettings(settings) {
@@ -180,13 +204,13 @@
 
       this.dom = getDomNodes(this.settings = applyUserSettings(settings));
 
-      this.dom.page.classList.add(this.settings.loadClass);
+      addClass(this.dom.page, this.settings.loadClass);
       this.listen();
     }
 
     _createClass(VanillaModal, [{
       key: "open",
-      value: function open(selector, e) {
+      value: function open(allMatches, e) {
         var page = this.dom.page;
         var _settings = this.settings,
             onbeforeopen = _settings.onbeforeopen,
@@ -194,7 +218,7 @@
             _class = _settings.class;
 
         this.releaseNode(this.current);
-        this.current = getElementContext(selector);
+        this.current = getElementContext(allMatches);
         if (!this.current) {
           return throwError("VanillaModal target must exist on page");
         }
@@ -202,7 +226,7 @@
           crankshaftTryCatch(onbeforeopen, this, e);
         }
         this.captureNode(this.current);
-        page.classList.add(_class);
+        addClass(page, _class);
         page.setAttribute("data-current-modal", this.current.id || "anonymous");
         this.isOpen = true;
         if (typeof onopen === "function") {
@@ -223,7 +247,7 @@
         if (typeof onbeforeclose === "function") {
           crankshaftTryCatch(onbeforeclose, this, e);
         }
-        dom.page.classList.remove(_class);
+        removeClass(dom.page, _class);
         if (transitions && transitionEnd && hasTransition(dom.modal)) {
           return this.closeModalWithTransition(e);
         }
