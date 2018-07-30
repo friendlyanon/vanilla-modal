@@ -210,7 +210,7 @@
 
     _createClass(VanillaModal, [{
       key: "open",
-      value: function open(allMatches, e) {
+      value: function open(selector, e) {
         var page = this.dom.page;
         var _settings = this.settings,
             onbeforeopen = _settings.onbeforeopen,
@@ -218,7 +218,7 @@
             _class = _settings.class;
 
         this.releaseNode(this.current);
-        this.current = getElementContext(allMatches);
+        this.current = getElementContext(selector);
         if (!this.current) {
           return throwError("VanillaModal target must exist on page");
         }
