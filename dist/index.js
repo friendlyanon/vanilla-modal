@@ -42,8 +42,8 @@
   }();
 
   var _Object$prototype = Object.prototype,
-    has = _Object$prototype.hasOwnProperty,
-    toString = _Object$prototype.toString;
+      has = _Object$prototype.hasOwnProperty,
+      toString = _Object$prototype.toString;
 
   var html = document.documentElement;
 
@@ -90,6 +90,9 @@
     onclose: null
   };
 
+  var instancesMap = [];
+  var instanceId = "data-vanilla-id-" + Math.random().toString(32).slice(2);
+
   function isArray(obj) {
     return toString.call(obj) === "[object Array]";
   }
@@ -115,17 +118,26 @@
     if (!el.hasAttribute("class")) return void el.setAttribute("class", _class);
     var classNames = trim(el.getAttribute("class")).split(whitespaceRegex);
     if (classNames.indexOf(_class) >= 0) return;
-    classNames.push(_class);
-    el.setAttribute("class", classNames.join(" "));
+    switch (classNames.length) {
+      case 0:
+        el.setAttribute("class", _class);break;
+      case 1:
+        el.setAttribute("class", classNames[0] + " " + _class);break;
+      default:
+        el.setAttribute("class", classNames.join(" ") + " " + _class);
+    }
   }
 
   function removeClass(el, _class) {
     if (!el.hasAttribute("class")) return;
     var classNames = trim(el.getAttribute("class")).split(whitespaceRegex);
+    var len = classNames.length;
+    if (!len) return void el.removeAttribute("class");
     var idx = classNames.indexOf(_class);
     if (idx < 0) return;
+    if (len === 1) return void el.removeAttribute("class");
     classNames.splice(idx, 1);
-    el.setAttribute("class", classNames.join(" "));
+    el.setAttribute("class", len > 2 ? classNames.join(" ") : classNames[0]);
   }
 
   function getElementContext(e) {
@@ -150,7 +162,7 @@
   function matches(target, selector) {
     var allMatches = target.ownerDocument.querySelectorAll(selector);
     if (!allMatches) return;
-    for (var i = -1, match; match = allMatches.item(++i);) {
+    for (var i = 0, match; match = allMatches.item(i++);) {
       var node = target;
       do {
         if (node === html) break;if (node === match) return node;
@@ -194,15 +206,47 @@
     }
   }
 
+  document.addEventListener("keydown", function (e) {
+    var len = instancesMap.length;
+    for (var i = 0; i < len; ++i) {
+      var inst = instancesMap[i];
+      if (inst) crankshaftTryCatch(inst.closeKeyHandler, inst, e);
+    }
+  }, false);
+
+  document.addEventListener("click", function (e) {
+    var len = instancesMap.length;
+    var node = e.target;
+    do {
+      if (node === html) break;
+      if (node.hasAttribute(instanceId)) {
+        var inst = instancesMap[node.getAttribute(instanceId)];
+        if (inst) crankshaftTryCatch(inst.outsideClickHandler, inst, e);
+        break;
+      }
+    } while (node = node.parentNode);
+    for (var i = 0; i < len; ++i) {
+      var _inst = instancesMap[i];
+      if (_inst === null) continue;
+      crankshaftTryCatch(_inst.delegateOpen, _inst, e);
+      crankshaftTryCatch(_inst.delegateClose, _inst, e);
+    }
+  }, false);
+
   var VanillaModal = function () {
     function VanillaModal(settings) {
       _classCallCheck(this, VanillaModal);
 
       this.isOpen = this.isListening = false;
-      this.current = null;
-      this.listeners = [];
+      this.current = this.instanceId = null;
 
       this.dom = getDomNodes(this.settings = applyUserSettings(settings));
+
+      var len = instancesMap.length;
+      for (var i = 0; i < len; ++i) {
+        var inst = instancesMap[i];
+        if (inst && inst.dom.modal.parentNode === null) instancesMap[i] = null;
+      }
 
       addClass(this.dom.page, this.settings.loadClass);
       this.listen();
@@ -329,36 +373,16 @@
       key: "listen",
       value: function listen() {
         if (this.isListening) return throwError("Event listeners already applied");
-        var that = this;
-        function modalClick(e) {
-          that.outsideClickHandler(e);
-        }
-        function docKeydown(e) {
-          that.closeKeyHandler(e);
-        }
-        function docClick(e) {
-          that.delegateOpen(e);that.delegateClose(e);
-        }
-        var modal = this.dom.modal,
-            listeners = this.listeners;
-
-        listeners.push(modalClick, docKeydown, docClick);
-        modal.addEventListener("click", modalClick, false);
-        document.addEventListener("keydown", docKeydown, false);
-        document.addEventListener("click", docClick, false);
+        this.dom.modal.setAttribute(instanceId, this.instanceId = instancesMap.push(this) - 1);
         this.isListening = true;
       }
     }, {
       key: "destroy",
       value: function destroy() {
         if (!this.isListening) return throwError("Event listeners already removed");
-        var modal = this.dom.modal,
-            listeners = this.listeners;
-
         this.close();
-        document.removeEventListener("click", listeners.pop(), false);
-        document.removeEventListener("keydown", listeners.pop(), false);
-        modal.removeEventListener("click", listeners.pop(), false);
+        this.instanceId = instancesMap[this.instanceId] = null;
+        this.dom.modal.removeAttribute(instanceId);
         this.isListening = false;
       }
     }]);
