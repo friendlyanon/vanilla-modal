@@ -182,7 +182,7 @@ export default class VanillaModal {
   constructor(settings) {
     this.isOpen =
     this.isListening = false;
-    this.current = null;
+    this.current =
     this.instanceId = null;
 
     this.dom = getDomNodes(this.settings = applyUserSettings(settings));
@@ -314,8 +314,8 @@ export default class VanillaModal {
   destroy() {
     if (!this.isListening) return throwError("Event listeners already removed");
     this.close();
+    this.instanceId =
     instancesMap[this.instanceId] = null;
-    this.instanceId = null;
     this.dom.modal.removeAttribute(instanceId);
     this.isListening = false;
   }
