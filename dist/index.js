@@ -238,8 +238,7 @@
       _classCallCheck(this, VanillaModal);
 
       this.isOpen = this.isListening = false;
-      this.current = null;
-      this.instanceId = null;
+      this.current = this.instanceId = null;
 
       this.dom = getDomNodes(this.settings = applyUserSettings(settings));
 
@@ -382,8 +381,7 @@
       value: function destroy() {
         if (!this.isListening) return throwError("Event listeners already removed");
         this.close();
-        instancesMap[this.instanceId] = null;
-        this.instanceId = null;
+        this.instanceId = instancesMap[this.instanceId] = null;
         this.dom.modal.removeAttribute(instanceId);
         this.isListening = false;
       }
