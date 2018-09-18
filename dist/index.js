@@ -162,7 +162,7 @@
   function matches(target, selector) {
     var allMatches = target.ownerDocument.querySelectorAll(selector);
     if (!allMatches) return;
-    for (var i = 0, match; match = allMatches.item(i++);) {
+    for (var i = 0, match; match = allMatches[i++];) {
       var node = target;
       do {
         if (node === html) break;if (node === match) return node;
