@@ -111,7 +111,7 @@ function applyUserSettings(settings) {
 function matches(target, selector) {
   const allMatches = target.ownerDocument.querySelectorAll(selector);
   if (!allMatches) return;
-  for (let i = 0, match; match = allMatches.item(i++); ) {
+  for (let i = 0, match; match = allMatches[i++]; ) {
     let node = target;
     do { if (node === html) break; if (node === match) return node; }
     while (node = node.parentNode);
