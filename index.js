@@ -70,7 +70,7 @@ function trim(str) {
   while (trimCodes.indexOf(str.charCodeAt(i++)) >= 0);
   if (i === j) return "";
   while (trimCodes.indexOf(str.charCodeAt(--j)) >= 0);
-  return --i === ++j ? "" : str.slice(i, j);
+  return --i >= ++j ? "" : str.slice(i, j);
 }
 
 function addClass(el, _class) {
