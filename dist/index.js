@@ -69,7 +69,7 @@
       transitionEnd = _ref[0],
       transitionDuration = _ref[1];
 
-  var trimRegex = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
+  var trimCodes = [9, 10, 11, 12, 13, 32, 65279];
   var whitespaceRegex = /\s+/;
 
   var defaults = {
@@ -111,7 +111,14 @@
   }
 
   function trim(str) {
-    return str.replace(trimRegex, "");
+    if (typeof str !== "string") return "";
+    var i = 0,
+        j = str.length;
+    if (!j) return "";
+    while (trimCodes.indexOf(str.charCodeAt(i++)) >= 0) {}
+    if (i === j) return "";
+    while (trimCodes.indexOf(str.charCodeAt(--j)) >= 0) {}
+    return --i >= ++j ? "" : str.slice(i, j);
   }
 
   function addClass(el, _class) {
