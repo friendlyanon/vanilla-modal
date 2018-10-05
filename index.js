@@ -22,7 +22,6 @@ const {
   }
   return {};
 })();
-const trimCodes = [9, 10, 11, 12, 13, 32, 65279];
 const whitespaceRegex = /\s+/;
 
 const defaults = {
@@ -65,17 +64,28 @@ function getNode(selector, parent) {
 
 function trim(str) {
   if (typeof str !== "string") return "";
-  let i = 0, j = str.length;
+  let c, i = 0, j = str.length;
   if (!j) return "";
-  while (trimCodes.indexOf(str.charCodeAt(i++)) >= 0);
+  while ((c = str.charCodeAt(i++)) >= 0) {
+    switch (c) {
+      case 9: case 10: case 11: case 12: case 13: case 32: case 65279: continue;
+    }
+    break;
+  }
   if (i === j) return "";
-  while (trimCodes.indexOf(str.charCodeAt(--j)) >= 0);
+  while ((c = str.charCodeAt(--j)) >= 0) {
+    switch (c) {
+      case 9: case 10: case 11: case 12: case 13: case 32: case 65279: continue;
+    }
+    break;
+  }
   return --i >= ++j ? "" : str.slice(i, j);
 }
 
 function addClass(el, _class) {
-  if (!el.hasAttribute("class")) return void el.setAttribute("class", _class);
-  const classNames = trim(el.getAttribute("class")).split(whitespaceRegex);
+  const attribute = el.getAttribute("class");
+  if (!attribute) return el.setAttribute("class", _class);
+  const classNames = trim(attribute).split(whitespaceRegex);
   if (classNames.indexOf(_class) >= 0) return;
   switch (classNames.length) {
     case 0: el.setAttribute("class", _class); break;
@@ -85,13 +95,14 @@ function addClass(el, _class) {
 }
 
 function removeClass(el, _class) {
-  if (!el.hasAttribute("class")) return;
-  const classNames = trim(el.getAttribute("class")).split(whitespaceRegex);
+  const attribute = el.getAttribute("class");
+  if (!attribute) return;
+  const classNames = trim(attribute).split(whitespaceRegex);
   const len = classNames.length;
-  if (!len) return void el.removeAttribute("class");
+  if (!len) return el.removeAttribute("class");
   const idx = classNames.indexOf(_class);
   if (idx < 0) return;
-  if (len === 1) return void el.removeAttribute("class");
+  if (len === 1) return el.removeAttribute("class");
   classNames.splice(idx, 1);
   el.setAttribute("class", len > 2 ? classNames.join(" ") : classNames[0]);
 }
@@ -170,7 +181,7 @@ document.addEventListener("click", function(e) {
   let node = e.target;
   do {
     if (node === html) break;
-    if (node.hasAttribute(instanceId)) {
+    if (node.getAttribute(instanceId)) {
       const inst = instancesMap[node.getAttribute(instanceId)];
       if (inst) crankshaftTryCatch(inst.outsideClickHandler, inst, e);
       break;
