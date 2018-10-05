@@ -69,7 +69,6 @@
       transitionEnd = _ref[0],
       transitionDuration = _ref[1];
 
-  var trimCodes = [9, 10, 11, 12, 13, 32, 65279];
   var whitespaceRegex = /\s+/;
 
   var defaults = {
@@ -111,38 +110,45 @@
   }
 
   function trim(str) {
+    var c, i, j;
     if (typeof str !== "string") return "";
-    var i = 0,
-        j = str.length;
+    i = 0, j = str.length;
     if (!j) return "";
-    while (trimCodes.indexOf(str.charCodeAt(i++)) >= 0) {}
+    while ((c = str.charCodeAt(i++)) >= 0) {
+      switch (c) {
+        case 9: case 10: case 11: case 12: case 13: case 32: case 65279: continue;
+      }
+      break;
+    }
     if (i === j) return "";
-    while (trimCodes.indexOf(str.charCodeAt(--j)) >= 0) {}
+    while ((c = str.charCodeAt(--j)) >= 0) {
+      switch (c) {
+        case 9: case 10: case 11: case 12: case 13: case 32: case 65279: continue;
+      }
+      break;
+    }
     return --i >= ++j ? "" : str.slice(i, j);
   }
 
   function addClass(el, _class) {
-    if (!el.hasAttribute("class")) return void el.setAttribute("class", _class);
-    var classNames = trim(el.getAttribute("class")).split(whitespaceRegex);
+    var attribute, classNames;
+    if (!(attribute = el.getAttribute("class"))) return el.setAttribute("class", _class);
+    classNames = trim(attribute).split(whitespaceRegex);
     if (classNames.indexOf(_class) >= 0) return;
     switch (classNames.length) {
-      case 0:
-        el.setAttribute("class", _class);break;
-      case 1:
-        el.setAttribute("class", classNames[0] + " " + _class);break;
-      default:
-        el.setAttribute("class", classNames.join(" ") + " " + _class);
+      case 0: el.setAttribute("class", _class); break;
+      case 1: el.setAttribute("class", classNames[0] + " " + _class); break;
+      default: el.setAttribute("class", classNames.join(" ") + " " + _class);
     }
   }
 
   function removeClass(el, _class) {
-    if (!el.hasAttribute("class")) return;
-    var classNames = trim(el.getAttribute("class")).split(whitespaceRegex);
-    var len = classNames.length;
-    if (!len) return void el.removeAttribute("class");
-    var idx = classNames.indexOf(_class);
-    if (idx < 0) return;
-    if (len === 1) return void el.removeAttribute("class");
+    var attribute, classNames, len, idx;
+    if (!(attribute = el.getAttribute("class"))) return;
+    classNames = trim(attribute).split(whitespaceRegex);
+    if (!(len = classNames.length)) return el.removeAttribute("class");
+    if ((idx = classNames.indexOf(_class)) < 0) return;
+    if (len === 1) return el.removeAttribute("class");
     classNames.splice(idx, 1);
     el.setAttribute("class", len > 2 ? classNames.join(" ") : classNames[0]);
   }
@@ -226,7 +232,7 @@
     var node = e.target;
     do {
       if (node === html) break;
-      if (node.hasAttribute(instanceId)) {
+      if (node.getAttribute(instanceId)) {
         var inst = instancesMap[node.getAttribute(instanceId)];
         if (inst) crankshaftTryCatch(inst.outsideClickHandler, inst, e);
         break;
