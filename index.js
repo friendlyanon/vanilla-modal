@@ -181,7 +181,7 @@ document.addEventListener("click", function(e) {
   let node = e.target;
   do {
     if (node === html) break;
-    if (node.hasAttribute(instanceId)) {
+    if (node.getAttribute(instanceId)) {
       const inst = instancesMap[node.getAttribute(instanceId)];
       if (inst) crankshaftTryCatch(inst.outsideClickHandler, inst, e);
       break;
