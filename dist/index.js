@@ -42,8 +42,8 @@
   }();
 
   var _Object$prototype = Object.prototype,
-      has = _Object$prototype.hasOwnProperty,
-      toString = _Object$prototype.toString;
+    has = _Object$prototype.hasOwnProperty,
+    toString = _Object$prototype.toString;
 
   var html = document.documentElement;
 
@@ -110,20 +110,23 @@
   }
 
   function trim(str) {
-    var c, i, j;
     if (typeof str !== "string") return "";
-    i = 0, j = str.length;
+    var c = void 0,
+        i = 0,
+        j = str.length;
     if (!j) return "";
     while ((c = str.charCodeAt(i++)) >= 0) {
       switch (c) {
-        case 9: case 10: case 11: case 12: case 13: case 32: case 65279: continue;
+        case 9:case 10:case 11:case 12:case 13:case 32:case 65279:
+          continue;
       }
       break;
     }
     if (i === j) return "";
     while ((c = str.charCodeAt(--j)) >= 0) {
       switch (c) {
-        case 9: case 10: case 11: case 12: case 13: case 32: case 65279: continue;
+        case 9:case 10:case 11:case 12:case 13:case 32:case 65279:
+          continue;
       }
       break;
     }
@@ -131,23 +134,28 @@
   }
 
   function addClass(el, _class) {
-    var attribute, classNames;
-    if (!(attribute = el.getAttribute("class"))) return el.setAttribute("class", _class);
-    classNames = trim(attribute).split(whitespaceRegex);
+    var attribute = el.getAttribute("class");
+    if (!attribute) return el.setAttribute("class", _class);
+    var classNames = trim(attribute).split(whitespaceRegex);
     if (classNames.indexOf(_class) >= 0) return;
     switch (classNames.length) {
-      case 0: el.setAttribute("class", _class); break;
-      case 1: el.setAttribute("class", classNames[0] + " " + _class); break;
-      default: el.setAttribute("class", classNames.join(" ") + " " + _class);
+      case 0:
+        el.setAttribute("class", _class);break;
+      case 1:
+        el.setAttribute("class", classNames[0] + " " + _class);break;
+      default:
+        el.setAttribute("class", classNames.join(" ") + " " + _class);
     }
   }
 
   function removeClass(el, _class) {
-    var attribute, classNames, len, idx;
-    if (!(attribute = el.getAttribute("class"))) return;
-    classNames = trim(attribute).split(whitespaceRegex);
-    if (!(len = classNames.length)) return el.removeAttribute("class");
-    if ((idx = classNames.indexOf(_class)) < 0) return;
+    var attribute = el.getAttribute("class");
+    if (!attribute) return;
+    var classNames = trim(attribute).split(whitespaceRegex);
+    var len = classNames.length;
+    if (!len) return el.removeAttribute("class");
+    var idx = classNames.indexOf(_class);
+    if (idx < 0) return;
     if (len === 1) return el.removeAttribute("class");
     classNames.splice(idx, 1);
     el.setAttribute("class", len > 2 ? classNames.join(" ") : classNames[0]);
@@ -164,18 +172,19 @@
 
   function applyUserSettings(settings) {
     var obj = {};
-    var k = void 0;
-    for (k in defaults) {
+    for (var k in defaults) {
       if (has.call(defaults, k)) obj[k] = defaults[k];
-    }for (k in settings) {
-      if (has.call(settings, k)) obj[k] = settings[k];
+    }for (var _k in settings) {
+      if (has.call(settings, _k)) obj[_k] = settings[_k];
     }return obj;
   }
 
   function matches(target, selector) {
     var allMatches = target.ownerDocument.querySelectorAll(selector);
     if (!allMatches) return;
-    for (var i = 0, match; match = allMatches[i++];) {
+    var len = allMatches.length;
+    for (var i = 0; i < len; ++i) {
+      var match = allMatches[i];
       var node = target;
       do {
         if (node === html) break;if (node === match) return node;
@@ -185,8 +194,7 @@
 
   function prepend(target, source) {
     var fragment = document.createDocumentFragment();
-    var el = void 0;
-    while (el = source.firstChild) {
+    for (var el; el = source.firstChild;) {
       fragment.appendChild(el);
     }target.insertBefore(fragment, target.firstChild);
   }
@@ -221,28 +229,36 @@
 
   document.addEventListener("keydown", function (e) {
     var len = instancesMap.length;
+    var _closeKeyHandler = VanillaModal.prototype._closeKeyHandler;
+
     for (var i = 0; i < len; ++i) {
       var inst = instancesMap[i];
-      if (inst) crankshaftTryCatch(inst.closeKeyHandler, inst, e);
+      if (inst) crankshaftTryCatch(_closeKeyHandler, inst, e);
     }
   }, false);
 
   document.addEventListener("click", function (e) {
     var len = instancesMap.length;
+    var _VanillaModal$prototy = VanillaModal.prototype,
+        _outsideClickHandler = _VanillaModal$prototy._outsideClickHandler,
+        _delegateOpen = _VanillaModal$prototy._delegateOpen,
+        _delegateClose = _VanillaModal$prototy._delegateClose;
+
     var node = e.target;
     do {
       if (node === html) break;
-      if (node.getAttribute(instanceId)) {
-        var inst = instancesMap[node.getAttribute(instanceId)];
-        if (inst) crankshaftTryCatch(inst.outsideClickHandler, inst, e);
+      var attribute = node.getAttribute(instanceId);
+      if (attribute) {
+        var inst = instancesMap[attribute];
+        if (inst) crankshaftTryCatch(_outsideClickHandler, inst, e);
         break;
       }
     } while (node = node.parentNode);
     for (var i = 0; i < len; ++i) {
       var _inst = instancesMap[i];
       if (_inst === null) continue;
-      crankshaftTryCatch(_inst.delegateOpen, _inst, e);
-      crankshaftTryCatch(_inst.delegateClose, _inst, e);
+      crankshaftTryCatch(_delegateOpen, _inst, e);
+      crankshaftTryCatch(_delegateClose, _inst, e);
     }
   }, false);
 
@@ -250,31 +266,31 @@
     function VanillaModal(settings) {
       _classCallCheck(this, VanillaModal);
 
-      this.isOpen = this.isListening = false;
-      this.current = this.instanceId = null;
+      this.isOpen = this._isListening = false;
+      this.current = this._instanceId = null;
 
-      this.dom = getDomNodes(this.settings = applyUserSettings(settings));
+      this._dom = getDomNodes(this._settings = applyUserSettings(settings));
 
       var len = instancesMap.length;
       for (var i = 0; i < len; ++i) {
         var inst = instancesMap[i];
-        if (inst && inst.dom.modal.parentNode === null) instancesMap[i] = null;
+        if (inst && inst._dom.modal.parentNode === null) instancesMap[i] = null;
       }
 
-      addClass(this.dom.page, this.settings.loadClass);
-      this.listen();
+      addClass(this._dom.page, this._settings.loadClass);
+      this._listen();
     }
 
     _createClass(VanillaModal, [{
       key: "open",
       value: function open(selector, e) {
-        var page = this.dom.page;
-        var _settings = this.settings,
+        var page = this._dom.page;
+        var _settings = this._settings,
             onbeforeopen = _settings.onbeforeopen,
             onopen = _settings.onopen,
             _class = _settings.class;
 
-        this.releaseNode(this.current);
+        this._releaseNode(this.current);
         this.current = getElementContext(selector);
         if (!this.current) {
           return throwError("VanillaModal target must exist on page");
@@ -282,7 +298,7 @@
         if (typeof onbeforeopen === "function") {
           crankshaftTryCatch(onbeforeopen, this, e);
         }
-        this.captureNode(this.current);
+        this._captureNode(this.current);
         addClass(page, _class);
         page.setAttribute("data-current-modal", this.current.id || "anonymous");
         this.isOpen = true;
@@ -294,29 +310,38 @@
       key: "close",
       value: function close(e) {
         if (!this.isOpen) return;
-        var _settings2 = this.settings,
+        var _settings2 = this._settings,
             transitions = _settings2.transitions,
             onbeforeclose = _settings2.onbeforeclose,
             _class = _settings2.class,
-            dom = this.dom;
+            _dom = this._dom;
 
         this.isOpen = false;
         if (typeof onbeforeclose === "function") {
           crankshaftTryCatch(onbeforeclose, this, e);
         }
-        removeClass(dom.page, _class);
-        if (transitions && transitionEnd && hasTransition(dom.modal)) {
-          return this.closeModalWithTransition(e);
+        removeClass(_dom.page, _class);
+        if (transitions && transitionEnd && hasTransition(_dom.modal)) {
+          return this._closeModalWithTransition(e);
         }
-        this.closeModal(e);
+        this._closeModal(e);
       }
     }, {
-      key: "closeModal",
-      value: function closeModal(e) {
-        var onclose = this.settings.onclose;
+      key: "destroy",
+      value: function destroy() {
+        if (!this._isListening) return throwError("Event listeners already removed");
+        this.close();
+        this._instanceId = instancesMap[this._instanceId] = null;
+        this._dom.modal.removeAttribute(instanceId);
+        this._isListening = false;
+      }
+    }, {
+      key: "_closeModal",
+      value: function _closeModal(e) {
+        var onclose = this._settings.onclose;
 
-        this.dom.page.removeAttribute("data-current-modal");
-        this.releaseNode(this.current);
+        this._dom.page.removeAttribute("data-current-modal");
+        this._releaseNode(this.current);
         this.isOpen = false;
         this.current = null;
         if (typeof onclose === "function") {
@@ -324,31 +349,31 @@
         }
       }
     }, {
-      key: "closeModalWithTransition",
-      value: function closeModalWithTransition(e) {
+      key: "_closeModalWithTransition",
+      value: function _closeModalWithTransition(e) {
         var that = this;
-        var modal = this.dom.modal;
+        var modal = this._dom.modal;
 
         function closeHandler() {
           modal.removeEventListener(transitionEnd, closeHandler, false);
-          that.closeModal(e);
+          that._closeModal(e);
         }
         modal.addEventListener(transitionEnd, closeHandler, false);
       }
     }, {
-      key: "captureNode",
-      value: function captureNode(node) {
-        if (node) prepend(this.dom.modalContent, node);
+      key: "_captureNode",
+      value: function _captureNode(node) {
+        if (node) prepend(this._dom.modalContent, node);
       }
     }, {
-      key: "releaseNode",
-      value: function releaseNode(node) {
-        if (node) prepend(node, this.dom.modalContent);
+      key: "_releaseNode",
+      value: function _releaseNode(node) {
+        if (node) prepend(node, this._dom.modalContent);
       }
     }, {
-      key: "closeKeyHandler",
-      value: function closeKeyHandler(e) {
-        var closeKeys = this.settings.closeKeys;
+      key: "_closeKeyHandler",
+      value: function _closeKeyHandler(e) {
+        var closeKeys = this._settings.closeKeys;
 
         if (this.isOpen && isArray(closeKeys) && closeKeys.length && closeKeys.indexOf(e.which) >= 0) {
           e.preventDefault();
@@ -356,10 +381,10 @@
         }
       }
     }, {
-      key: "outsideClickHandler",
-      value: function outsideClickHandler(e) {
-        if (!this.settings.clickOutside) return;
-        var modalInner = this.dom.modalInner;
+      key: "_outsideClickHandler",
+      value: function _outsideClickHandler(e) {
+        if (!this._settings.clickOutside) return;
+        var modalInner = this._dom.modalInner;
 
         var node = e.target;
         do {
@@ -368,35 +393,26 @@
         this.close(e);
       }
     }, {
-      key: "delegateOpen",
-      value: function delegateOpen(e) {
-        var matchedNode = matches(e.target, this.settings.open);
+      key: "_delegateOpen",
+      value: function _delegateOpen(e) {
+        var matchedNode = matches(e.target, this._settings.open);
         if (!matchedNode) return;
         e.preventDefault();
         this.open(matchedNode, e);
       }
     }, {
-      key: "delegateClose",
-      value: function delegateClose(e) {
-        if (!matches(e.target, this.settings.close)) return;
+      key: "_delegateClose",
+      value: function _delegateClose(e) {
+        if (!matches(e.target, this._settings.close)) return;
         e.preventDefault();
         this.close(e);
       }
     }, {
-      key: "listen",
-      value: function listen() {
-        if (this.isListening) return throwError("Event listeners already applied");
-        this.dom.modal.setAttribute(instanceId, this.instanceId = instancesMap.push(this) - 1);
-        this.isListening = true;
-      }
-    }, {
-      key: "destroy",
-      value: function destroy() {
-        if (!this.isListening) return throwError("Event listeners already removed");
-        this.close();
-        this.instanceId = instancesMap[this.instanceId] = null;
-        this.dom.modal.removeAttribute(instanceId);
-        this.isListening = false;
+      key: "_listen",
+      value: function _listen() {
+        if (this._isListening) return throwError("Event listeners already applied");
+        this._dom.modal.setAttribute(instanceId, this._instanceId = instancesMap.push(this) - 1);
+        this._isListening = true;
       }
     }]);
 
